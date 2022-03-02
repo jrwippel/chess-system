@@ -1,5 +1,7 @@
 package boardgame;
 
+import chess.ChessPiece;
+
 public class Board {
 
     private Integer rows;
@@ -61,4 +63,6 @@ public class Board {
         }
         return piece(position) != null;
     }
+
+
 }
