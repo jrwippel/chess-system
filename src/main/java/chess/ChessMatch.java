@@ -5,6 +5,8 @@ import boardgame.Piece;
 import boardgame.Position;
 import chess.pieces.King;
 import chess.pieces.Rook;
+import com.sun.javadoc.SourcePosition;
+import com.sun.source.util.SourcePositions;
 
 import java.util.PrimitiveIterator;
 
@@ -29,6 +31,12 @@ public class ChessMatch {
 
     private void placeNewPiece(char column, int row, ChessPiece piece) {
         board.placepiece(piece, new ChessPosition(column, row).toPosition());
+    }
+
+    public boolean[][] possibleMoves(ChessPosition sourcePosition){
+        Position position = sourcePosition.toPosition();
+        validateSourcePosition(position);
+        return board.piece(position).possibleMoves();
     }
 
     public ChessPiece performChessMove (ChessPosition sourcePosition, ChessPosition targetPosition){
