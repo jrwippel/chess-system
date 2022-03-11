@@ -5,16 +5,20 @@ import boardgame.Piece;
 import boardgame.Position;
 import chess.pieces.King;
 import chess.pieces.Rook;
-import com.sun.javadoc.SourcePosition;
-import com.sun.source.util.SourcePositions;
 
-import java.util.PrimitiveIterator;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ChessMatch {
 
     private int turn;
     private Color currentPlayer;
     private Board board;
+
+    private List<Piece> piecesOnTheBoard = new ArrayList<>();
+    private List<Piece> capturedPieces = new ArrayList<>();
+
 
     public ChessMatch() {
         board = new Board(8, 8);
@@ -48,6 +52,7 @@ public class ChessMatch {
 
     private void placeNewPiece(char column, int row, ChessPiece piece) {
         board.placepiece(piece, new ChessPosition(column, row).toPosition());
+        piecesOnTheBoard.add(piece);
     }
 
     public boolean[][] possibleMoves(ChessPosition sourcePosition){
@@ -71,6 +76,11 @@ public class ChessMatch {
         Piece p = board.removePiece(source);
         Piece capturedPiece = board.removePiece(target);
         board.placepiece(p, target);
+
+        if (capturedPiece != null){
+            piecesOnTheBoard.remove(capturedPiece);
+            capturedPieces.add(capturedPiece);
+        }
         return capturedPiece;
     }
 
@@ -94,8 +104,6 @@ public class ChessMatch {
             throw new ChessException("The chosen piece cant move to target position");
         }
     }
-
-
 
     private void initialSetup(){
         placeNewPiece('c', 1, new Rook(board, Color.WHITE));
