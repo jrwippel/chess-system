@@ -9,12 +9,14 @@ import chess.pieces.Rook;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ChessMatch {
 
     private int turn;
     private Color currentPlayer;
     private Board board;
+    private boolean check;
 
     private List<Piece> piecesOnTheBoard = new ArrayList<>();
     private List<Piece> capturedPieces = new ArrayList<>();
@@ -25,6 +27,10 @@ public class ChessMatch {
         turn = 1;
         currentPlayer = Color.WHITE;
         initialSetup();
+    }
+
+    public boolean getCheck() {
+        return check;
     }
 
     public int getTurn() {
@@ -50,6 +56,7 @@ public class ChessMatch {
         currentPlayer = (currentPlayer == Color.WHITE) ? Color.BLACK : Color.BLACK;
     }
 
+
     private void placeNewPiece(char column, int row, ChessPiece piece) {
         board.placepiece(piece, new ChessPosition(column, row).toPosition());
         piecesOnTheBoard.add(piece);
@@ -68,6 +75,13 @@ public class ChessMatch {
         validateSourcePosition(source);
         validateTargetPosition(source, target);
         Piece capturedPiece = makeMove(source, target);
+
+        if (testCheck(currentPlayer)){
+            undoMove(source, target, capturedPiece);
+            throw new ChessException("You can't put yourself in check!");
+        }
+        check = (testCheck(opponent(currentPlayer))) ? true : false;
+
         nextTurn();
         return (ChessPiece) capturedPiece;
     }
@@ -84,14 +98,24 @@ public class ChessMatch {
         return capturedPiece;
     }
 
+    private void undoMove(Position source, Position target, Piece capturedPiece){
+        Piece p = board.removePiece(target);        // remove a peça destino
+        board.placepiece(p, source);                // devolve a peça para a origem
+        if (capturedPiece != null){                 // verifica se houve peça capturada
+            board.placepiece(capturedPiece, target);// nesse caso, devolve a peça capturada para o destino
+            capturedPieces.remove(capturedPiece);   // remove a peça da lista de peças capturadas
+            piecesOnTheBoard.add(capturedPiece);    // adiciona a peça na lista de peças do tabuleiro
+
+        }
+
+    }
+
     private void validateSourcePosition(Position position){
         if (!board.thereIsAPiece(position)){
             throw new ChessException("There is no piece on source position");
         }
         if (currentPlayer != ((ChessPiece)board.piece(position)).getColor()){
             throw new ChessException("The chosen piece is not yours");
-
-
         }
 
         if (!board.piece(position).isThereAnyPossibleMove()){
@@ -104,6 +128,38 @@ public class ChessMatch {
             throw new ChessException("The chosen piece cant move to target position");
         }
     }
+
+    private Color opponent (Color color){
+        return (color == Color.WHITE) ? Color.BLACK : Color.WHITE;
+        // se a cor for branca, retorna cor preta, senão retorna o branco
+    }
+
+    private ChessPiece king (Color color){
+        //procurar na minha lista um rei com a cor do parametro.
+        List<Piece> list = piecesOnTheBoard.stream().filter(x -> ((ChessPiece)x).getColor()==color).collect(Collectors.toList());
+
+        for (Piece p:list){
+            if (p instanceof King){
+                return (ChessPiece)p;
+            }
+        }
+        throw new IllegalStateException("There is no "+ color +" king on the board");
+    }
+    private boolean testCheck(Color color){
+        // Percorre o tabuleiro para verificar se existe alguma peça de rei em check
+        Position kingPosition = king(color).getChessPosition().toPosition();
+        List<Piece> opponentPieces = piecesOnTheBoard.stream().filter(x -> ((ChessPiece)x).getColor()== opponent(color)).collect(Collectors.toList());
+
+        for (Piece piece: opponentPieces){
+            boolean[][] mat = piece.possibleMoves();
+            if (mat[kingPosition.getRow()][kingPosition.getColumn()]){
+                return true;
+            }
+        }
+        return false;
+    }
+
+
 
     private void initialSetup(){
         placeNewPiece('c', 1, new Rook(board, Color.WHITE));
