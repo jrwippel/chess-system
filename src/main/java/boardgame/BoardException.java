@@ -1,7 +1,7 @@
 package boardgame;
 
-public class BoardException extends RuntimeException{
-    public BoardException(String msg){
+public class BoardException extends RuntimeException {
+    public BoardException(String msg) {
         super(msg);
 
     }
