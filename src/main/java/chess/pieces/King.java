@@ -2,13 +2,17 @@ package chess.pieces;
 
 import boardgame.Board;
 import boardgame.Position;
+import chess.ChessMatch;
 import chess.ChessPiece;
 import chess.Color;
 
 public class King extends ChessPiece {
 
-    public King(Board board, Color color) {
+    private ChessMatch chessMatch;
+
+    public King(Board board, Color color, ChessMatch chessMatch) {
         super(board, color);
+        this.chessMatch = chessMatch;
     }
 
     @Override
@@ -19,6 +23,14 @@ public class King extends ChessPiece {
     private boolean canMove(Position position) {
         ChessPiece p = (ChessPiece) getBoard().piece(position);
         return p == null || p.getColor() != getColor();
+    }
+    //Verifica se a torre esta apta a realizar o rock
+    private boolean testRockCastling(Position position){
+        //Recebe uma posição como parametro e verifica se a posição não esta vazia
+        // e se é uma torre da mesma cor, alem de verificar se a torre não teve nenhuma jogada
+        //ainda. Se satisfazer essa condição retorna verdadeiro
+        ChessPiece p = (ChessPiece) getBoard().piece(position);
+        return p != null && p instanceof Rook && p.getColor() == getColor() && p.getMoveCount() == 0;
     }
 
     @Override
@@ -73,6 +85,32 @@ public class King extends ChessPiece {
         p.setValues(position.getRow() + 1, position.getColumn() + 1);
         if (getBoard().positionExists(p) && canMove(p)) {
             mat[p.getRow()][p.getColumn()] = true;
+        }
+
+        //special move castling
+        if (getMoveCount() == 0 && !chessMatch.getCheck()){ //se o rei não teve nenhuma jogada e não estiver em check
+            //special move castling kingside rook
+            Position posT1 = new Position(position.getRow(),  position.getColumn() + 3 ); // pega a exata posicao da torre a direita do rei
+            if (testRockCastling(posT1)){ //verifica se a torre da mesma , não tiver nenhuma jogada ainda, e realmente for uma torre
+                Position p1 = new Position(position.getRow(), position.getColumn() + 1);
+                Position p2 = new Position(position.getRow(), position.getColumn() + 2);
+                if (getBoard().piece(p1) == null && getBoard().piece(p2) == null){
+                    mat[position.getRow()][position.getColumn() + 2] = true;
+                }
+            }
+
+
+            //special move castling queenside rook
+            Position postT2 = new Position(position.getRow(), position.getColumn() - 4 );
+            if (testRockCastling(postT2)){
+                Position p1 = new Position(position.getRow(), position.getColumn() - 1);
+                Position p2 = new Position(position.getRow(), position.getColumn() - 2);
+                Position p3 = new Position(position.getRow(), position.getColumn() - 3);
+                if (getBoard().piece(p1) == null && getBoard().piece(p2) == null && getBoard().piece(p3) == null){
+                    mat [position.getRow()][position.getColumn() - 2] = true;
+
+                }
+            }
         }
 
 
