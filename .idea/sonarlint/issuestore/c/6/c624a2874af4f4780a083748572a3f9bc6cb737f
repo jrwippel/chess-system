@@ -1,9 +1,0 @@
-
-_
-java:S2147/"DCombine this catch with the one at line 43, which has the same body.(±…žÁÿÿÿÿÿ
-S	java:S106"9Replace this use of System.out or System.err by a logger.(ªÓ¼áþÿÿÿÿ
-M	java:S106"9Replace this use of System.out or System.err by a logger.(èÕªm
-S	java:S106!"9Replace this use of System.out or System.err by a logger.(ªÓ¼áþÿÿÿÿ
-N	java:S106""9Replace this use of System.out or System.err by a logger.(¤ûŒµ
-S	java:S106,"9Replace this use of System.out or System.err by a logger.(©þêÜúÿÿÿÿ
-S	java:S1060"9Replace this use of System.out or System.err by a logger.(©þêÜúÿÿÿÿ
